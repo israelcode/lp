@@ -1,0 +1,42 @@
+prist("вы").
+prist("у").
+prist("из").
+prist("о").
+
+suff("онн").
+suff("енн").
+suff("ова").
+suff("ива").
+suff("ан").
+suff("ин").
+
+okonch("ил", r("М"), ch("ед")).
+okonch("ила", r("Ж"), ch("ед")).
+okonch("или", r("мн"), ch("мн")).
+
+ 
+analiz(Slovo,morf(Prist,kor(Ost),Suf,Okonch,Rod,Chislo)):-
+        find_prist(Slovo,Prist,Slovo1),
+        find_okonch(Slovo1,Okonch,Rod,Chislo,Slovo2),
+        find_suff(Slovo2,Suf,Ost), !.
+        
+find_prist(Slovo,prist(Prist),Ost):-
+        prist(Prist),
+        concat(Prist,Ost,Slovo).
+find_prist(Ost,prist(""),Ost).                
+ 
+find_koren(Slovo,kor(Koren),Ost):-
+        koren(Koren),
+        concat(Koren,Ost,Slovo).
+        
+find_suff(Slovo,suf(Suffiks),Ost):-
+        suff(Suf),
+        concat(Slovo1,Suf,Slovo),
+        find_suff(Slovo1,suf(Suffiks1),Ost),
+        concat(Suffiks1,Suf,Suffiks),!.
+find_suff(Slovo,suf(""),Slovo).
+ 
+find_okonch(Slovo,okonch(Okonch),Rod,Chislo,Ost):-
+        okonch(Okonch,Rod,Chislo),
+        concat(Ost,Okonch,Slovo).
+find_okonch(Slovo,okonch(""),rod("muzh"),chislo("ed"),Slovo).
