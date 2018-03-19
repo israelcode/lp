@@ -1,0 +1,36 @@
+solve(L):-L = [("husband", _), ("wife", _), ("son", _), ("husbandsister", _), ("wifesfather", _)] ,
+    memb((X, "lawyer"), L),  
+    memb((Y, "teacher"), L), 
+    memb((Z, "mechanic"), L),
+    memb((U, "economist"), L),
+    memb((V, "engineer"), L),
+    not_blood_relatives(X, Y),
+    brother("husband", V),
+    male(U),
+    not(younger(U, Z)),
+    not(younger(V, "wife")),
+    not(younger(Z, V)).
+
+male("husband").
+male("son").
+male("wifesfather").
+
+younger("son", "husband").
+younger("son", "wife").
+younger("son", "wifesfather").
+younger("wife", "wifesfather").
+younger("wife", "husbandsister").
+
+brother("husband", "husbandsister").
+
+not_blood_relative("husband", "wife").
+not_blood_relative("husbandsister", "wife").
+not_blood_relative("wifesfather", "husband").
+not_blood_relative("husbandsister", "wifesfather").
+
+not_blood_relatives(X, Y):- 
+    not_blood_relative(X, Y); 
+    not_blood_relative(Y, X).
+
+ memb(A,[A|_]).
+ memb(A,[_|L]):- memb(A,L).
