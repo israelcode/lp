@@ -1,0 +1,138 @@
+check(L):-
+	delete(L, 'K', L1),
+	length(L1, N), X is N,
+	delete(L, 'M', L2),
+	length(L2, M), Y is M, 
+	(X >= Y; X==0).
+
+i_sort(A, B):-
+	append(Begin, ['M', 'K' | T], A),
+	append(Begin, ['K', 'M' | T], C),
+	i_sort(C, B);
+	append(A, [], B).
+
+% один миссонер и один каннибал вправо
+move(A, B):-
+	append(Lt, ['right' | Rt], A),
+	append(Begin, ['K', 'M' | T], Lt),
+	append(Rt, ['K', 'M'], Rt2),
+	check(Rt2),
+	i_sort(Rt2, RSORT),
+	append(Begin, T, L),
+	check(L),
+	append(L, ['left'], L1),
+	append(L1, RSORT, B).
+
+% один миссионер влево
+move(A, B):-
+	append(Lt, ['left' | Rt], A),
+	append(Begin, ['M' | T], Rt),
+	append(['M'], Lt, Lt2),
+	check(Lt2),
+	i_sort(Lt2, LSORT),
+	append(Begin, T, R),
+	check(R),
+	append(['right'], R, R1),
+	append(LSORT, R1, B).
+
+
+% два миссионера и каннибал вправо
+move(A, B):-
+	append(Lt, ['right' | Rt], A),
+	append(Begin, ['K', 'M', 'M' | T], Lt),
+	append(Rt, ['K', 'M', 'M'], Rt2),
+	check(Rt2),
+	i_sort(Rt2, RSORT),
+	append(Begin, T, L),
+	check(L),
+	append(L, ['left'], L1),
+	append(L1, RSORT, B).
+
+
+% один миссонер и оди каннибал переплывают влево
+move(A, B):-
+	append(Lt, ['left' | Rt], A),
+	append(Begin, ['K', 'M' | T], Rt),
+	append(['K', 'M'], Lt, Lt2),
+	check(Lt2),
+	i_sort(Lt2, LSORT),
+	append(Begin, T, R),
+	check(R),
+	append(['right'], R, R1),
+	append(LSORT, R1, B).
+
+% печать решения
+
+print([_]).
+
+print([_, B | T]):-
+	print([B | T]),
+	nl,
+	write(B).
+	
+ans_print([A | _]):-
+	nl,
+	write(A),
+	nl.
+
+prolong([Temp | T], [New, Temp | T]):-
+	move(Temp, New),
+	not(member(New, [Temp | T])).
+
+% поиск в глубину
+
+search_dpth(X, Y):-
+    	get_time(TIME1),
+	dpth([X], Y, W),
+	get_time(TIME2),
+	print(W),
+	ans_print(W),
+    	T1 is TIME2 - TIME1,
+   	write('time:'), write(T1), nl, nl.
+
+
+
+dpth([Y | T], Y, [Y | T]).
+
+dpth(Wtemp, Y, W):-
+	prolong(Wtemp, NewWay),
+	dpth(NewWay, Y, W).
+
+% поиск в ширину
+
+search_bdth(X, Y):-
+	get_time(TIME1),
+	bdth([[X]], Y, W),
+    	get_time(TIME2),
+	print(W),
+	ans_print(W),
+   	T1 is TIME2 - TIME1,
+	write('time:'), write(T1), nl, nl.
+
+bdth([[X | T] | _], X, [X | T]).
+
+bdth([Wtemp | Wother], X, W):-
+	findall(W, prolong(Wtemp, W), Ways),
+	append(Wother, Ways, NewWays),
+	bdth(NewWays, X, W).
+
+% поиск с итерационным углублением
+
+int(1).
+int(N):- int(M), N is M + 1.
+
+search_id(X, Y):-
+    	get_time(TIME1),
+	int(Level),
+	(Level > 100, !; id([X], Y, W, Level), print(W), ans_print(W)),
+    	get_time(TIME2),
+    	T1 is TIME2 - TIME1,
+	write('time:'), write(T1), nl, nl.
+
+id([X | T], X, [X | T], 0).
+
+id(Wtemp, X, W, N):-
+	N > 0,
+	prolong(Wtemp, NewWay),
+	N1 is N - 1,
+	id(NewWay, X, W, N1).
